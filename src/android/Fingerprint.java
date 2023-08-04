@@ -157,8 +157,18 @@ public class Fingerprint extends CordovaPlugin {
 
             PluginResult result = new PluginResult(PluginResult.Status.ERROR, resultJson);
             result.setKeepCallback(true);
-            cordova.getActivity().runOnUiThread(() ->
-                    Fingerprint.this.mCallbackContext.sendPluginResult(result));
+            cordova.getActivity().runOnUiThread(() -> {
+              try {
+                final CallbackContext context = Fingerprint.this.mCallbackContext;
+                if (context == null) {
+                  Log.w(TAG, "Cannot sent message because callback context is null. code: " + code + ", message" + message);
+                  return;
+                }
+                context.sendPluginResult(result);
+              } catch (Throwable e) {
+                Log.e(TAG, e.getMessage(), e);
+              }
+            });
         } catch (JSONException e) {
             Log.e(TAG, e.getMessage(), e);
         }
